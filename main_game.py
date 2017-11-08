@@ -15,16 +15,17 @@
 #Phase one: basic framework
 #			  in this phase, I will build a metro system with
 #             three stations that works on themselves
-#Phase 1 ends at Version 15
+#Phase 1 ends at Version 15 of user43_YOieCoiga0
 
 #Phase two: visual effects
 #			in this phase, I will make the link look like metro map
 #    		and all the trains turn at each station
-#Phase 2 ends at Version 0 of the new file
+#Phase 2 ends at Version 0 of user43_rZkLD0LkLW
 
 #Phase three: mouse click system
 #			in this phase, I will build a line creation system and a tracking system 
 #			that allows me to modify line with mouth drag
+#Phase 3 ends ar Version 20 of user43_rZkLD0LkLW
 
 
 import simplegui
@@ -35,20 +36,29 @@ import math
 STATION_TYPE = ["Circle", "Square", "Triangle"]
 COLORS = ["Red", "Blue", "Green", "Yellow", "Orange"]
 SPEED = 2
-SPAWN_INTERVAL = 180
-CROWDED_LIMIT = 300
 
 score = 0
 game_over_message = ""
+tutorial_message = ""
 station_station_click = []
 line_click = []
+station_spawn_list = []
+station_spawn_timer = 0
+temporary_timer = 0
+tutorial_step = 0
+screen = "Menu"
 start = False
+tutorial = True
+
+station_spawn_interval = 60
+spawn_interval = 240
+crowded_limit = 600
 
 #--------------------Helper Functions
 
 def draw_station(canvas, type, location, crowded_time):
     # draw the station overcrowd image
-    crowded = float(crowded_time) / CROWDED_LIMIT
+    crowded = float(crowded_time) / crowded_limit
     color_str = "rgba(255, 0, 0, %f)" % crowded
     canvas.draw_circle(location, 20, 40, color_str, color_str)    
 
@@ -64,7 +74,7 @@ def draw_station(canvas, type, location, crowded_time):
         
 def draw_line(location1, location2, canvas, color):
     # draw line to the two stations given
-    canvas.draw_line(location1, location2, 5, color)
+    canvas.draw_line(location1, location2, 10, color)
     
 def draw_train(canvas, location, rotation):
     canvas.draw_image(black_train_pic, (18, 9), (36, 18), location, (48, 24), rotation)
@@ -240,11 +250,82 @@ def line_click_update():
                 if train.line == line_click[0]:
                     train_group.train_list.remove(train)
         line_click = []
-    
+
+def tutorial_update():
+    global start, tutorial, tutorial_step, tutorial_message, temporary_timer
+    if screen == "Game":
+        if tutorial_step == 0:
+            tutorial_message = "Click on two stations to build a line between them."
+            if not len(line_group.line_list) == 0:
+                tutorial_step = 1
+
+        if tutorial_step == 1:
+            tutorial_message = "Great Job! Now add the third station to your line!"
+            if len(line_group.line_list[0].stations) == 3:
+                tutorial_step = 3
+            if len(line_group.line_list) == 2:
+                tutorial_step = 2
+
+        if tutorial_step == 2:
+            tutorial_message = "Oops you created a 2nd line, double click on the line to delete it."
+            if len(line_group.line_list) == 1:
+                tutorial_step = 1
+
+        if tutorial_step == 3:
+            tutorial_message = "Cool, we now have a passenger at our station!"
+            if temporary_timer == 0:
+                line_group.line_list[0].stations[0].new_passenger()
+            temporary_timer += 1
+            if len(line_group.line_list[0].stations[0].passengers) == 0:
+                tutorial_step = 4
+                temporary_timer = 0
+
+        if tutorial_step == 4:
+            tutorial_message = "Once the passenger arrive at his station, you will get a point!"
+            if score == 1:
+                tutorial_step = 5
+
+        if tutorial_step == 5:
+            tutorial_message = "The new station is crowded! create a new line to get passengers moving!"
+            if temporary_timer == 0:
+                new_station = Station([130,50], "Circle")
+                new_station.crowded_time = 50
+                new_station.new_passenger()
+                new_station.new_passenger()
+                new_station.new_passenger()
+                new_station.new_passenger()
+                new_station.new_passenger()
+                new_station.new_passenger()
+                station_group.add(new_station)
+            temporary_timer += 1
+            if station_group.station_list[3].crowded_time == 0:
+                temporary_timer = 0
+                tutorial_step = 6
+
+        if tutorial_step == 6:
+            tutorial_message = "Now you've learn the basics, go and start building!"
+            temporary_timer += 1
+            if temporary_timer == 10:
+                tutorial = False
+                temporary_timer = 0
+                tutorial_message = ""
+                tutorial_step = 0
+                start = True
+            
+
+def station_spawner():
+    global station_spawn_timer
+    if station_spawn_timer >= station_spawn_interval:
+        station_group.station_list.append(station_spawn_list.pop(0))
+        station_spawn_timer = 0
+    station_spawn_timer += 1
+
+        
 def game_over():
-    global game_over_message, start
+    global game_over_message, start, screen
     game_over_message = "Game Over"
     start = False
+    screen = "Menu"
         
 #--------------------------Classes
 class Passengers:
@@ -287,6 +368,7 @@ class Train:
         self.wait = 0
         self.passenger = []
         self.rotation = 0
+        self.passenger_pickup()
     
     def draw(self, canvas):
         draw_train(canvas, self.position, self.rotation)
@@ -426,7 +508,7 @@ class Station:
         
     def update(self):
         # creat new passenger every spawn interval
-        if self.timer >= SPAWN_INTERVAL:
+        if self.timer >= spawn_interval:
             if start:
                 self.new_passenger()
                 self.timer = 0
@@ -434,7 +516,7 @@ class Station:
             self.timer += 1
         # station overload timer
         if len(self.passengers) >= 6:
-            if self.crowded_time > CROWDED_LIMIT:
+            if self.crowded_time > crowded_limit:
                 game_over()
             else:
                 self.crowded_time += 1
@@ -498,96 +580,276 @@ class Line:
 #------------------Define event handlers
 
 def draw_handler(canvas):
-    if not len(line_group.line_list) == 0:
-        i = 0
-        for line in line_group.line_list:
-            color = COLORS[i]
-            line.draw(canvas, color)
-            i += 1
-        i = 0
+    if screen == "Game":
         
-    train_group.update()
-    if not len(train_group.train_list) == 0:
-        train_group.draw(canvas)  
-    station_group.draw(canvas)
-    station_group.update()
-    station_station_click_update()
-    line_click_update()
-    canvas.draw_text("Score: " + str(score), (700, 20), 24, 'Black')
-    canvas.draw_text(game_over_message, (50, 250), 24, 'Black')
+        if not len(line_group.line_list) == 0:
+            i = 0
+            for line in line_group.line_list:
+                color = COLORS[i]
+                line.draw(canvas, color)
+                i += 1
+            i = 0
+
+        train_group.update()
+        if not len(train_group.train_list) == 0:
+            train_group.draw(canvas)  
+        station_group.draw(canvas)
+        station_group.update()
+        station_station_click_update()
+        line_click_update()
+        canvas.draw_text("Score: " + str(score), (700, 20), 24, 'Black')
+        canvas.draw_text(game_over_message, (50, 250), 24, 'Black')
+
+        lines_left = 5 - len(line_group.line_list)
+        canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
+        canvas.draw_text(tutorial_message, (50, 400), 24, 'Black')
+        
+    if screen == "Menu":
+        canvas.draw_image(menu, (1147,722), (2294,1444), (400,250), (800,500))
+        canvas.draw_text("Tutorial", (250, 370), 48, 'Black')
+        canvas.draw_text("Easy", (550, 370), 48, 'Black')
+        canvas.draw_text("Medium", (250, 460), 48, 'Black')
+        canvas.draw_text("High", (550, 460), 48, 'Black')
     
-    lines_left = 5 - len(line_group.line_list)
-    canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
+def timer_handler():
+    # if in tutorial, run the tutotial handler
+    if tutorial:
+        tutorial_update()
     
+    # if the game start, run the station spawner
+    if start:
+        station_spawner()
+        
     
 def key_handler(key):
-    if key == simplegui.KEY_MAP['1']:
-        create_new_line()
-        connect(my_station1, my_station2)
-        line_group.line_list[0].add_train()
-    if key == simplegui.KEY_MAP['2']:
-        connect(my_station2, my_station3)
+    if screen == "Game":
+        if key == simplegui.KEY_MAP['1']:
+            create_new_line()
+            connect(my_station1, my_station2)
+            line_group.line_list[0].add_train()
+        if key == simplegui.KEY_MAP['2']:
+            connect(my_station2, my_station3)
+        
+    if screen == "Menu":
+        pass
         
 def mouse_handler(position):
-    # check if mouse click near a station
-    stop = False
-    for station in station_group.station_list:
-        distance = math.sqrt(math.pow(station.location[0] - position[0], 2) + math.pow(station.location[1] - position[1], 2))
-        if distance < 15:
-            station_station_click.append(station)
-            stop = True
-    
-    # check if mouse click near a line
-    if not stop:
-        for line in line_group.line_list:
-            for segment in line.structure:
-                distance = point_line_dist(position, segment[0], segment[1])
-                if distance < 5:
-                    line_click.append(line)
+    if screen == "Game":
+        # check if mouse click near a station
+        stop = False
+        for station in station_group.station_list:
+            distance = math.sqrt(math.pow(station.location[0] - position[0], 2) + math.pow(station.location[1] - position[1], 2))
+            if distance < 15:
+                station_station_click.append(station)
+                stop = True
+
+        # check if mouse click near a line
+        if not stop:
+            for line in line_group.line_list:
+                for segment in line.structure:
+                    distance = point_line_dist(position, segment[0], segment[1])
+                    if distance < 5:
+                        line_click.append(line)
+                        
+    if screen == "Menu":
+        if position[0] > 250 and position[0] < 450 and position[1] < 370 and position[1] > 320:
+            # click on Tutorial Button
+            reset("Tutorial")
+            
+        if position[0] > 550 and position[0] < 750 and position[1] < 370 and position[1] > 320:
+            # click on Easy Button
+            reset("Easy")
+            
+        if position[0] > 250 and position[0] < 450 and position[1] < 460 and position[1] > 410: 
+            # click on Medium Button
+            reset("Medium")
+            
+        if position[0] > 550 and position[0] < 750 and position[1] < 460 and position[1] > 410:
+            # click on Hard Button
+            reset("Hard")
+            
+        
             
 def start_game():
     global start
     start = True
-
     
-def reset():
-    # Reset all globals
-    global score, game_over_message, station_station_click, start
-    score = 0
-    game_over_message = ""
-    station_station_click = []
-    start = False
-    
-    # Stations initialize
+def reset(mode):
+    global score, game_over_message, tutorial_message, station_station_click, start, screen, tutorial
     global station_group, line_group, train_group
-    station_group = Stations()
-    my_station1 = Station([430,50], "Circle")
-    my_station2 = Station([350,200], "Square")
-    my_station3 = Station([150,200], "Triangle")
-    my_station4 = Station([130,50], "Circle")
-    my_station5 = Station([220,100], "Circle")
-    my_station6 = Station([550,200], "Triangle")
-    my_station7 = Station([430,400], "Circle")
-    my_station8 = Station([240,400], "Square")
-    my_station9 = Station([150,300], "Triangle")
-    my_station10 = Station([430,200], "Circle")
-    my_station11 = Station([540,400], "Square")
-    my_station12 = Station([550,300], "Triangle")    
-    station_group.add(my_station1)
-    station_group.add(my_station2)
-    station_group.add(my_station3)
-    station_group.add(my_station4)
-    station_group.add(my_station5)
-    station_group.add(my_station6)
-    station_group.add(my_station7)
-    station_group.add(my_station8)
-    station_group.add(my_station9)
-    station_group.add(my_station10)
-    station_group.add(my_station11)
-    station_group.add(my_station12)
+    global station_spawn_interval, spawn_interval, crowded_limit
     
-    line_group = Lines()
-    train_group = Trains()
+    if mode == "Tutorial":
+        # Reset all globals
+        score = 0
+        game_over_message = ""
+        station_station_click = []
+        start = False
+        tutorial = True
+        screen = "Game"
+        station_spawn_interval = 120
+        spawn_interval = 300
+        crowded_limit = 1200
+
+        
+        # Stations initialize
+        station_group = Stations()
+        my_station1 = Station([430,50], "Circle")
+        my_station2 = Station([350,200], "Square")
+        my_station3 = Station([150,200], "Triangle")
+        my_station4 = Station([550,300], "Triangle")
+        my_station5 = Station([220,100], "Circle")
+        my_station6 = Station([550,200], "Triangle")
+        my_station7 = Station([430,400], "Circle")
+        my_station8 = Station([240,400], "Square")
+        my_station9 = Station([150,300], "Triangle")
+        my_station10 = Station([430,200], "Circle")
+        my_station11 = Station([540,400], "Square")
+
+        station_group.add(my_station1)
+        station_group.add(my_station2)
+        station_group.add(my_station3)
+
+        station_spawn_list.append(my_station4)
+        station_spawn_list.append(my_station5)
+        station_spawn_list.append(my_station6)
+        station_spawn_list.append(my_station7)
+        station_spawn_list.append(my_station8)
+        station_spawn_list.append(my_station9)
+        station_spawn_list.append(my_station10)
+        station_spawn_list.append(my_station11)
+
+        line_group = Lines()
+        train_group = Trains()
+        
+    if mode == "Easy":
+        # Reset all globals
+        score = 0
+        game_over_message = ""
+        station_station_click = []
+        start = True
+        tutorial = False
+        screen = "Game"
+        station_spawn_interval = 60
+        spawn_interval = 300
+        crowded_limit = 1200
+
+
+        # Stations initialize
+        station_group = Stations()
+        my_station1 = Station([430,50], "Circle")
+        my_station2 = Station([350,200], "Square")
+        my_station3 = Station([150,200], "Triangle")
+        my_station4 = Station([550,300], "Triangle")
+        my_station5 = Station([220,100], "Circle")
+        my_station6 = Station([550,200], "Triangle")
+        my_station7 = Station([430,400], "Circle")
+        my_station8 = Station([240,400], "Square")
+        my_station9 = Station([150,300], "Triangle")
+        my_station10 = Station([430,200], "Circle")
+        my_station11 = Station([540,400], "Square")
+
+        station_group.add(my_station1)
+        station_group.add(my_station2)
+        station_group.add(my_station3)
+
+        station_spawn_list.append(my_station4)
+        station_spawn_list.append(my_station5)
+        station_spawn_list.append(my_station6)
+        station_spawn_list.append(my_station7)
+        station_spawn_list.append(my_station8)
+        station_spawn_list.append(my_station9)
+        station_spawn_list.append(my_station10)
+        station_spawn_list.append(my_station11)
+
+        line_group = Lines()
+        train_group = Trains()
+    
+    if mode == "Medium":
+        # Reset all globals
+        score = 0
+        game_over_message = ""
+        station_station_click = []
+        start = True
+        tutorial = False
+        screen = "Game"
+        station_spawn_interval = 60
+        spawn_interval = 240
+        crowded_limit = 900
+
+
+        # Stations initialize
+        station_group = Stations()
+        my_station1 = Station([430,50], "Circle")
+        my_station2 = Station([350,200], "Square")
+        my_station3 = Station([150,200], "Triangle")
+        my_station4 = Station([550,300], "Triangle")
+        my_station5 = Station([220,100], "Circle")
+        my_station6 = Station([550,200], "Triangle")
+        my_station7 = Station([430,400], "Circle")
+        my_station8 = Station([240,400], "Square")
+        my_station9 = Station([150,300], "Triangle")
+        my_station10 = Station([430,200], "Circle")
+        my_station11 = Station([540,400], "Square")
+
+        station_group.add(my_station1)
+        station_group.add(my_station2)
+        station_group.add(my_station3)
+        station_group.add(my_station4)
+        station_group.add(my_station5)
+        station_group.add(my_station6)
+        
+        station_spawn_list.append(my_station7)
+        station_spawn_list.append(my_station8)
+        station_spawn_list.append(my_station9)
+        station_spawn_list.append(my_station10)
+        station_spawn_list.append(my_station11)
+
+        line_group = Lines()
+        train_group = Trains()
+    
+    if mode == "Hard":
+        # Reset all globals
+        score = 0
+        game_over_message = ""
+        station_station_click = []
+        start = True
+        tutorial = False
+        screen = "Game"
+        station_spawn_interval = 30
+        spawn_interval = 240
+        crowded_limit = 600
+
+
+        # Stations initialize
+        station_group = Stations()
+        my_station1 = Station([430,50], "Circle")
+        my_station2 = Station([350,200], "Square")
+        my_station3 = Station([150,200], "Triangle")
+        my_station4 = Station([550,300], "Triangle")
+        my_station5 = Station([220,100], "Circle")
+        my_station6 = Station([550,200], "Triangle")
+        my_station7 = Station([430,400], "Circle")
+        my_station8 = Station([240,400], "Square")
+        my_station9 = Station([150,300], "Triangle")
+        my_station10 = Station([430,200], "Circle")
+        my_station11 = Station([540,400], "Square")
+
+        station_group.add(my_station1)
+        station_group.add(my_station2)
+        station_group.add(my_station3)
+        station_group.add(my_station4)
+        station_group.add(my_station5)
+        station_group.add(my_station6)
+        station_group.add(my_station7)
+        station_group.add(my_station8)
+        station_group.add(my_station9)
+        
+        station_spawn_list.append(my_station10)
+        station_spawn_list.append(my_station11)
+
+        line_group = Lines()
+        train_group = Trains()
     
 
 station_group = Stations()
@@ -595,6 +857,7 @@ line_group = Lines()
 train_group = Trains()
 #----------------------Create a frame
 black_train_pic = simplegui.load_image("https://dl.dropbox.com/s/3jss4r73a5q0wiq/black_train.jpg?dl=0")
+menu = simplegui.load_image("https://dl.dropbox.com/s/7f2ewottnbte37q/menu.jpg?dl=0")
 
 frame = simplegui.create_frame('Game', 800, 500)
 frame.set_canvas_background('rgb(247,233,206)')
@@ -602,6 +865,8 @@ frame.set_draw_handler(draw_handler)
 frame.set_mouseclick_handler(mouse_handler)
 start_button = frame.add_button('Rush Hour!', start_game)
 reset_button = frame.add_button('New Game', reset)
+
+timer = simplegui.create_timer(1000, timer_handler)
 
 
 #temporary codes
@@ -612,4 +877,4 @@ frame.set_keydown_handler(key_handler)
 #------------------Start frame and timer
 
 frame.start()
-reset()
+timer.start()
