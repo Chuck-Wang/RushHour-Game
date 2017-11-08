@@ -1,7 +1,5 @@
 #Chuck's Rush Hour Game
 
-#Please copy the .py file to http://rice.codeskulptor.org/ to run!
-
 #Controls:
 #Click New Game to start a new game
 #Click Rush Hour to let the passengers in your system
