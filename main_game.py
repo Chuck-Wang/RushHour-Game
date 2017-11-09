@@ -12,7 +12,7 @@
 #Developing note
 
 # in line station connect: on
-# transparent line: roll back point : version 32
+# transparent line: roll back point : version 33
 
 
 #Phase one: basic framework
@@ -29,6 +29,11 @@
 #			in this phase, I will build a line creation system and a tracking system 
 #			that allows me to modify line with mouth drag
 #Phase 3 ends ar Version 20 of user43_rZkLD0LkLW
+
+#Phase four: menu, level and tutorial
+#			in this phase, I will build three level with different difficulty
+#			a user interface, and a tutorial
+#Phase 4 ends ar Version 35 of user43_rZkLD0LkLW
 
 
 import simplegui
@@ -52,6 +57,7 @@ tutorial_step = 0
 screen = "Menu"
 start = False
 tutorial = True
+double_speed = False
 
 station_spawn_interval = 60
 spawn_interval = 240
@@ -77,7 +83,23 @@ def draw_station(canvas, type, location, crowded_time):
         
 def draw_line(location1, location2, canvas, color):
     # draw line to the two stations given
-    canvas.draw_line(location1, location2, 10, color)
+    
+    if color == "Red":
+        color_str = "rgba(255, 0, 0, 0.5)"
+    
+    if color == "Blue":
+        color_str = "rgba(0, 0, 255, 0.5)"
+    
+    if color == "Green":
+        color_str = "rgba(0, 255, 0, 0.5)"
+    
+    if color == "Yellow":
+        color_str = "rgba(255, 255, 0, 0.5)"
+    
+    if color == "Orange":
+        color_str = "rgba(255, 165, 0, 0.5)"
+    
+    canvas.draw_line(location1, location2, 10, color_str)
     
 def draw_train(canvas, location, rotation):
     canvas.draw_image(black_train_pic, (18, 9), (36, 18), location, (48, 24), rotation)
@@ -343,6 +365,8 @@ def station_spawner():
             station_group.station_list.append(station_spawn_list.pop(0))
             station_spawn_timer = 0
     station_spawn_timer += 1
+    if double_speed:
+        station_spawn_timer += 1
 
         
 def game_over():
@@ -413,6 +437,8 @@ class Train:
                 self.wait = 0
             else:
                 self.wait += 1
+                if double_speed:
+                    self.wait += 1
         elif self.turn:
             if math.fabs(self.rotation - point_rotation) < 0.1:
                 self.rotation = point_rotation
@@ -420,23 +446,30 @@ class Train:
             else:
                 if self.rotation > point_rotation:
                     self.rotation -= 0.1
+                    if double_speed:
+                        self.rotation -= 0.1
                 else:
                     self.rotation += 0.1
+                    if double_speed:
+                        self.rotation += 0.1
         else:
             # if moving, check for stop, and move
-            if station_distance < 1:
+            if station_distance < 2:
                 self.waiting = True
                 self.turn = True
                 self.destination_update()
                 self.point_update()
                 self.passenger_dropoff()
                 self.passenger_pickup()
-            elif point_distance < 1:
+            elif point_distance < 2:
                 self.turn = True
                 self.point_update()
             else: 
                 self.position[0] += point_vector[0] * speed_co
                 self.position[1] += point_vector[1] * speed_co
+                if double_speed:
+                    self.position[0] += point_vector[0] * speed_co
+                    self.position[1] += point_vector[1] * speed_co
                 
     def point_update(self):
         if self.direction:
@@ -538,15 +571,21 @@ class Station:
                 self.timer = 0
         else:
             self.timer += 1
+            if double_speed:
+                self.timer += 1
         # station overload timer
         if len(self.passengers) >= 6:
             if self.crowded_time > crowded_limit:
                 game_over()
             else:
                 self.crowded_time += 1
+                if double_speed:
+                    self.crowded_time += 1
         else:
             if not self.crowded_time == 0:
                 self.crowded_time -= 1
+                if double_speed:
+                    self.crowded_time -=1
             
 
 class Lines:
@@ -605,7 +644,7 @@ class Line:
 
 def draw_handler(canvas):
     if screen == "Game":
-        
+        # draw game elements
         if not len(line_group.line_list) == 0:
             i = 0
             for line in line_group.line_list:
@@ -621,8 +660,14 @@ def draw_handler(canvas):
         station_group.update()
         station_station_click_update()
         line_click_update()
+        
+        # draw UI elements
         canvas.draw_text("Score: " + str(score), (700, 20), 24, 'Black')
         canvas.draw_text(game_over_message, (50, 250), 24, 'Black')
+        
+        canvas.draw_polygon([[740, 40], [740, 60], [756, 50]], 1, 'Black', 'Black')
+        canvas.draw_polygon([[730, 70], [730, 90], [746, 80]], 1, 'Black', 'Black')
+        canvas.draw_polygon([[750, 70], [750, 90], [766, 80]], 1, 'Black', 'Black')
 
         lines_left = 5 - len(line_group.line_list)
         canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
@@ -658,22 +703,31 @@ def key_handler(key):
         pass
         
 def mouse_handler(position):
+    global double_speed
     if screen == "Game":
         # check if mouse click near a station
-        stop = False
+        if position[0] < 770 and position[0] > 730 and position[1] > 40 and position[1] < 60:
+            double_speed = False
+        
+        if position[0] < 770 and position[0] > 730 and position[1] > 70 and position[1] < 90:
+            double_speed = True
+        
         for station in station_group.station_list:
             distance = math.sqrt(math.pow(station.location[0] - position[0], 2) + math.pow(station.location[1] - position[1], 2))
             if distance < 15:
-                station_station_click.append(station)
-                stop = True
+                if len(station_station_click) == 0:
+                    station_station_click.append(station)
+                else:
+                    if not station == station_station_click[0]:
+                        station_station_click.append(station)
+                return None
 
         # check if mouse click near a line
-        if not stop:
-            for line in line_group.line_list:
-                for segment in line.structure:
-                    distance = point_line_dist(position, segment[0], segment[1])
-                    if distance < 5:
-                        line_click.append(line)
+        for line in line_group.line_list:
+            for segment in line.structure:
+                distance = point_line_dist(position, segment[0], segment[1])
+                if distance < 5:
+                    line_click.append(line)
                         
     if screen == "Menu":
         if position[0] > 250 and position[0] < 450 and position[1] < 370 and position[1] > 320:
