@@ -101,6 +101,10 @@ def draw_line(location1, location2, canvas, color):
     
     canvas.draw_line(location1, location2, 10, color_str)
     
+    """ old version: non transparent line
+    canvas.draw_line(location1, location2, 10, color)
+    """
+    
 def draw_train(canvas, location, rotation):
     canvas.draw_image(black_train_pic, (18, 9), (36, 18), location, (48, 24), rotation)
     
@@ -765,8 +769,8 @@ def reset(mode):
         start = False
         tutorial = True
         screen = "Game"
-        station_spawn_interval = 120
-        spawn_interval = 300
+        station_spawn_interval = 30
+        spawn_interval = 600
         crowded_limit = 1200
 
         
@@ -809,7 +813,7 @@ def reset(mode):
         tutorial = False
         screen = "Game"
         station_spawn_interval = 20
-        spawn_interval = 300
+        spawn_interval = 600
         crowded_limit = 1200
 
 
@@ -851,8 +855,8 @@ def reset(mode):
         start = True
         tutorial = False
         screen = "Game"
-        station_spawn_interval = 60
-        spawn_interval = 240
+        station_spawn_interval = 20
+        spawn_interval = 420
         crowded_limit = 900
 
 
@@ -894,9 +898,9 @@ def reset(mode):
         start = True
         tutorial = False
         screen = "Game"
-        station_spawn_interval = 30
-        spawn_interval = 240
-        crowded_limit = 600
+        station_spawn_interval = 20
+        spawn_interval = 300
+        crowded_limit = 900
 
 
         # Stations initialize
