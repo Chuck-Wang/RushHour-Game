@@ -10,6 +10,11 @@
 # Game Pitch Sheet: https://dl.dropbox.com/s/lzxz96254mmlfu9/Rush%20Hour%20-%20Chuck%20Wang.pdf?dl=0
 
 #Developing note
+
+# in line station connect: on
+# transparent line: roll back point : version 32
+
+
 #Phase one: basic framework
 #			  in this phase, I will build a metro system with
 #             three stations that works on themselves
@@ -186,11 +191,24 @@ def station_station_click_update():
         # if the station is at the end of the line, add the other station to the end
         if not stop:
             for line in line_group.line_list:
+                """  in line station connect
                 if station_station_click[0] in line.stations and station_station_click[1] in line.stations:
-                    stop = True
-                elif station_station_click[0] == line.stations[-1]:
+                    line.update_point()
+                    line.update_structure()
+                    station_station_click = []
+                    return None
+                """
+                if station_station_click[0] == line.stations[-1]:
                     line.stations.append(station_station_click[1])
-                    stop = True
+                    
+                    #update line
+                    line.update_point()
+                    line.update_structure()
+                    
+                    #reset tracker
+                    station_station_click = []
+                    return None
+                
                 elif station_station_click[0] == line.stations[0]:
                     line.stations.insert(0, station_station_click[1])
                     # update train position when add station at the beginning
@@ -204,9 +222,14 @@ def station_station_click_update():
                             if train.line == line:
                                 train.current += 1
                                 train.current_point += 2
-                    stop = True
-                line.update_point()
-                line.update_structure()
+                    
+                    # update line
+                    line.update_point()
+                    line.update_structure()
+                    
+                    #reset tracker
+                    station_station_click = []
+                    return None
         
         # if the stations are not at the end of the line, make a new line
         if not stop:
@@ -218,9 +241,11 @@ def station_station_click_update():
                 new_line.update_point()
                 new_line.update_structure()
                 new_line.add_train()
+                
+                # reset tracker
+                station_station_click = []
         
-        # reset the station click tracker
-        station_station_click = []
+        
     
 """
 def line_click_update():
@@ -314,8 +339,9 @@ def tutorial_update():
 def station_spawner():
     global station_spawn_timer
     if station_spawn_timer >= station_spawn_interval:
-        station_group.station_list.append(station_spawn_list.pop(0))
-        station_spawn_timer = 0
+        if not len(station_spawn_list) == 0:
+            station_group.station_list.append(station_spawn_list.pop(0))
+            station_spawn_timer = 0
     station_spawn_timer += 1
 
         
@@ -607,7 +633,7 @@ def draw_handler(canvas):
         canvas.draw_text("Tutorial", (250, 370), 48, 'Black')
         canvas.draw_text("Easy", (550, 370), 48, 'Black')
         canvas.draw_text("Medium", (250, 460), 48, 'Black')
-        canvas.draw_text("High", (550, 460), 48, 'Black')
+        canvas.draw_text("Hard", (550, 460), 48, 'Black')
     
 def timer_handler():
     # if in tutorial, run the tutotial handler
@@ -728,7 +754,7 @@ def reset(mode):
         start = True
         tutorial = False
         screen = "Game"
-        station_spawn_interval = 60
+        station_spawn_interval = 20
         spawn_interval = 300
         crowded_limit = 1200
 
@@ -750,8 +776,8 @@ def reset(mode):
         station_group.add(my_station1)
         station_group.add(my_station2)
         station_group.add(my_station3)
-
-        station_spawn_list.append(my_station4)
+        station_group.add(my_station4)
+        
         station_spawn_list.append(my_station5)
         station_spawn_list.append(my_station6)
         station_spawn_list.append(my_station7)
