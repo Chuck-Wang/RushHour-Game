@@ -58,6 +58,7 @@ screen = "Menu"
 start = False
 tutorial = True
 double_speed = False
+line_selection = "Red"
 
 station_spawn_interval = 60
 spawn_interval = 240
@@ -83,25 +84,27 @@ def draw_station(canvas, type, location, crowded_time):
         
 def draw_line(location1, location2, canvas, color):
     # draw line to the two stations given
-    
-    if color == "Red":
-        color_str = "rgba(255, 0, 0, 0.5)"
-    
-    if color == "Blue":
-        color_str = "rgba(0, 0, 255, 0.5)"
-    
-    if color == "Green":
-        color_str = "rgba(0, 255, 0, 0.5)"
-    
-    if color == "Yellow":
-        color_str = "rgba(255, 255, 0, 0.5)"
-    
-    if color == "Orange":
-        color_str = "rgba(255, 165, 0, 0.5)"
+    if color == line_selection:
+        color_str = color
+    else:
+        if color == "Red":
+            color_str = "rgba(255, 0, 0, 0.5)"
+
+        if color == "Blue":
+            color_str = "rgba(0, 0, 255, 0.5)"
+
+        if color == "Green":
+            color_str = "rgba(0, 255, 0, 0.5)"
+
+        if color == "Yellow":
+            color_str = "rgba(255, 255, 0, 0.5)"
+
+        if color == "Orange":
+            color_str = "rgba(255, 165, 0, 0.5)"
     
     canvas.draw_line(location1, location2, 10, color_str)
     
-    """ old version: non transparent line
+    """ old version: non transparent line\\\\\\\\\\\\\\\
     canvas.draw_line(location1, location2, 10, color)
     """
     
@@ -208,7 +211,7 @@ def create_new_line():
     line_group.line_list.append(new_line)
     
 def station_station_click_update():
-    global station_station_click
+    global station_station_click, line_selection
     stop = False
     if len(station_station_click) == 2:
         if station_station_click[0] == station_station_click[1]:
@@ -267,6 +270,10 @@ def station_station_click_update():
                 new_line.update_point()
                 new_line.update_structure()
                 new_line.add_train()
+                
+                # change highlighted line
+                line_number = len(line_group.line_list)
+                line_selection = COLORS[line_number - 1]
                 
                 # reset tracker
                 station_station_click = []
@@ -651,10 +658,18 @@ def draw_handler(canvas):
         # draw game elements
         if not len(line_group.line_list) == 0:
             i = 0
-            for line in line_group.line_list:
+            highlight = False
+            for line in set(line_group.line_list):
                 color = COLORS[i]
-                line.draw(canvas, color)
+                if color == line_selection:
+                    line_highlight = line
+                    color_highlight = color
+                    highlight = True
+                else:
+                    line.draw(canvas, color)
                 i += 1
+            if highlight:
+                line_highlight.draw(canvas, color_highlight)
             i = 0
 
         train_group.update()
@@ -666,16 +681,46 @@ def draw_handler(canvas):
         line_click_update()
         
         # draw UI elements
+        # screen message
         canvas.draw_text("Score: " + str(score), (700, 20), 24, 'Black')
         canvas.draw_text(game_over_message, (50, 250), 24, 'Black')
+        lines_left = 5 - len(line_group.line_list)
+        canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
         
+        # speed buttons
         canvas.draw_polygon([[740, 40], [740, 60], [756, 50]], 1, 'Black', 'Black')
         canvas.draw_polygon([[730, 70], [730, 90], [746, 80]], 1, 'Black', 'Black')
         canvas.draw_polygon([[750, 70], [750, 90], [766, 80]], 1, 'Black', 'Black')
-
-        lines_left = 5 - len(line_group.line_list)
-        canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
+        
+        # tutorial message
         canvas.draw_text(tutorial_message, (50, 400), 24, 'Black')
+        
+        #line selection
+        """
+        if color == "Red":
+        color_str = "rgba(255, 0, 0, 0.5)"
+    
+    if color == "Blue":
+        color_str = "rgba(0, 0, 255, 0.5)"
+    
+    if color == "Green":
+        color_str = "rgba(0, 255, 0, 0.5)"
+    
+    if color == "Yellow":
+        color_str = "rgba(255, 255, 0, 0.5)"
+    
+    if color == "Orange":
+        color_str = "rgba(255, 165, 0, 0.5)"
+    
+        canvas.draw_line(location1, location2, 10, color_str)
+        """
+        
+        canvas.draw_line((720, 410), (780, 410), 18, "Red")
+        canvas.draw_line((720, 430), (780, 430), 18, "Blue")
+        canvas.draw_line((720, 450), (780, 450), 18, "Green")
+        canvas.draw_line((720, 470), (780, 470), 18, "Yellow")
+        canvas.draw_line((720, 490), (780, 490), 18, "Orange")
+        
         
     if screen == "Menu":
         canvas.draw_image(menu, (1147,722), (2294,1444), (400,250), (800,500))
@@ -707,15 +752,29 @@ def key_handler(key):
         pass
         
 def mouse_handler(position):
-    global double_speed
+    global double_speed, line_selection
     if screen == "Game":
-        # check if mouse click near a station
+        # Line draw selection
+        if position[0] > 720 and position[0] < 780:
+            if position[1] > 400 and position[1] < 420:
+                line_selection = "Red"
+            if position[1] > 420 and position[1] < 440:
+                line_selection = "Blue"
+            if position[1] > 440 and position[1] < 460:
+                line_selection = "Green"
+            if position[1] > 460 and position[1] < 480:
+                line_selection = "Yellow"
+            if position[1] > 480 and position[1] < 500:
+                line_selection = "Orange"
+        
+        # Game speed control
         if position[0] < 770 and position[0] > 730 and position[1] > 40 and position[1] < 60:
             double_speed = False
         
         if position[0] < 770 and position[0] > 730 and position[1] > 70 and position[1] < 90:
             double_speed = True
         
+        # check if mouse click near a station
         for station in station_group.station_list:
             distance = math.sqrt(math.pow(station.location[0] - position[0], 2) + math.pow(station.location[1] - position[1], 2))
             if distance < 15:
