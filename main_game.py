@@ -1,10 +1,16 @@
 #Chuck's Rush Hour Game
 
+#It's rush hour!
+#Connect those dots!
+#Get the passenengers to
+#their destination!
+#ASAP!
+
 #Controls:
-#Click New Game to start a new game
-#Click Rush Hour to let the passengers in your system
 #Clink on a station and then click on a new station to create a line
 #Double click on a line to delete the line
+#Click the icons on the upper-right side to change game speed
+#Click the icons on the lower-right side to change line selection
 #The passenger will get on the train and disappear when they arrive at their destination
 
 # Game Pitch Sheet: https://dl.dropbox.com/s/lzxz96254mmlfu9/Rush%20Hour%20-%20Chuck%20Wang.pdf?dl=0
@@ -219,6 +225,40 @@ def station_station_click_update():
             stop = True        
         # if the station is at the end of the line, add the other station to the end
         if not stop:
+            for line in line_group.line_list:
+                if line_group.line_list.index(line) == COLORS.index(line_selection):
+                    if station_station_click[0] == line.stations[-1]:
+                        line.stations.append(station_station_click[1])
+
+                        #update line
+                        line.update_point()
+                        line.update_structure()
+
+                        #reset tracker
+                        station_station_click = []
+                        return None
+
+                    elif station_station_click[0] == line.stations[0]:
+                        line.stations.insert(0, station_station_click[1])
+                        # update train position when add station at the beginning
+                        if get_point(station_station_click[0].location, station_station_click[1].location) == None:
+                            for train in train_group.train_list:
+                                if train.line == line:
+                                    train.current += 1
+                                    train.current_point += 1
+                        else:
+                            for train in train_group.train_list:
+                                if train.line == line:
+                                    train.current += 1
+                                    train.current_point += 2
+
+                        # update line
+                        line.update_point()
+                        line.update_structure()
+
+                        #reset tracker
+                        station_station_click = []
+                        return None
             for line in line_group.line_list:
                 """  in line station connect
                 if station_station_click[0] in line.stations and station_station_click[1] in line.stations:
@@ -836,14 +876,14 @@ def reset(mode):
         # Stations initialize
         station_group = Stations()
         my_station1 = Station([430,50], "Circle")
-        my_station2 = Station([350,200], "Square")
+        my_station2 = Station([350,230], "Square")
         my_station3 = Station([150,200], "Triangle")
         my_station4 = Station([550,300], "Triangle")
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
-        my_station7 = Station([430,400], "Circle")
+        my_station7 = Station([430,380], "Circle")
         my_station8 = Station([240,400], "Square")
-        my_station9 = Station([150,300], "Triangle")
+        my_station9 = Station([170,300], "Triangle")
         my_station10 = Station([430,200], "Circle")
         my_station11 = Station([540,400], "Square")
 
@@ -879,14 +919,14 @@ def reset(mode):
         # Stations initialize
         station_group = Stations()
         my_station1 = Station([430,50], "Circle")
-        my_station2 = Station([350,200], "Square")
+        my_station2 = Station([350,230], "Square")
         my_station3 = Station([150,200], "Triangle")
         my_station4 = Station([550,300], "Triangle")
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
-        my_station7 = Station([430,400], "Circle")
+        my_station7 = Station([430,380], "Circle")
         my_station8 = Station([240,400], "Square")
-        my_station9 = Station([150,300], "Triangle")
+        my_station9 = Station([170,300], "Triangle")
         my_station10 = Station([430,200], "Circle")
         my_station11 = Station([540,400], "Square")
 
@@ -922,14 +962,14 @@ def reset(mode):
         # Stations initialize
         station_group = Stations()
         my_station1 = Station([430,50], "Circle")
-        my_station2 = Station([350,200], "Square")
+        my_station2 = Station([350,230], "Square")
         my_station3 = Station([150,200], "Triangle")
         my_station4 = Station([550,300], "Triangle")
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
-        my_station7 = Station([430,400], "Circle")
+        my_station7 = Station([430,380], "Circle")
         my_station8 = Station([240,400], "Square")
-        my_station9 = Station([150,300], "Triangle")
+        my_station9 = Station([170,300], "Triangle")
         my_station10 = Station([430,200], "Circle")
         my_station11 = Station([540,400], "Square")
 
@@ -965,14 +1005,14 @@ def reset(mode):
         # Stations initialize
         station_group = Stations()
         my_station1 = Station([430,50], "Circle")
-        my_station2 = Station([350,200], "Square")
+        my_station2 = Station([350,230], "Square")
         my_station3 = Station([150,200], "Triangle")
         my_station4 = Station([550,300], "Triangle")
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
-        my_station7 = Station([430,400], "Circle")
+        my_station7 = Station([430,380], "Circle")
         my_station8 = Station([240,400], "Square")
-        my_station9 = Station([150,300], "Triangle")
+        my_station9 = Station([170,300], "Triangle")
         my_station10 = Station([430,200], "Circle")
         my_station11 = Station([540,400], "Square")
 
