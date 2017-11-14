@@ -136,7 +136,7 @@ def draw_train_passenger(canvas, position, passengers):
     passenger_no = 0
     for passenger in passengers:
         if passenger.destination == "Circle":
-            canvas.draw_circle(location, 2.5, 4, 'white', 'white')
+            canvas.draw_circle(location, 2.5, 4, 'white', )
         if passenger.destination == "Square":
             point_list = [[location[0] - 2.25, location[1] - 2.25], [location[0] - 2.25, location[1] + 2.25], [location[0] + 2.25, location[1] + 2.25], [location[0] + 2.25, location[1] - 2.25]]
             canvas.draw_polygon(point_list, 4, 'white', 'white')
@@ -148,7 +148,21 @@ def draw_train_passenger(canvas, position, passengers):
             location = [position[0] - 12, position[1] + 4.5]
         else:
             location = [location[0] + 9, location[1]]
+
+def draw_selected_station(canvas):
+    if len(station_station_click) == 1:
+        station = station_station_click[0]
         
+        if station.type == "Circle":
+            canvas.draw_circle(station.location, 10, 1, 'Black', line_selection)
+        if station.type == "Square":
+            point_list = [[station.location[0] - 9, station.location[1] - 9], [station.location[0] - 9, station.location[1] + 9], [station.location[0] + 9, station.location[1] + 9], [station.location[0] + 9, station.location[1] - 9]]
+            canvas.draw_polygon(point_list, 1, 'Black', line_selection)
+        if station.type == "Triangle":
+            point_list = [[station.location[0], station.location[1] - 7], [station.location[0] - 8.66, station.location[1] + 9], [station.location[0] + 8.66, station.location[1] + 9]]
+            canvas.draw_polygon(point_list, 1, 'Black', line_selection)
+        
+            
 def get_point(location1, location2):
     # get the turning point for the rail between two given station position
     if location1[0] == location2[0]:
@@ -220,14 +234,33 @@ def station_station_click_update():
     global station_station_click, line_selection
     stop = False
     if len(station_station_click) == 2:
+        
+        # cancel on double click
         if station_station_click[0] == station_station_click[1]:
             station_station_click = []
-            stop = True        
-        # if the station is at the end of the line, add the other station to the end
-        if not stop:
-            for line in line_group.line_list:
-                if line_group.line_list.index(line) == COLORS.index(line_selection):
-                    if station_station_click[0] == line.stations[-1]:
+            # update line
+            line.update_point()
+            line.update_structure()
+
+            #reset tracker
+            station_station_click = []
+            return None
+        
+        # add station on selected line
+        for line in line_group.line_list:
+            if line.color == line_selection:
+                if station_station_click[0] == line.stations[-1] or station_station_click[1] == line.stations[-1] or station_station_click[0] == line.stations[0] or station_station_click[1] == line.stations[0]:
+                    if station_station_click[0] == line.stations[-1] and (station_station_click[1] in line.stations):
+                        #reset tracker
+                        station_station_click = []
+                        return None
+                    
+                    elif station_station_click[0] == line.stations[0] and (station_station_click[1] in line.stations):
+                        #reset tracker
+                        station_station_click = []
+                        return None
+                    
+                    elif station_station_click[0] == line.stations[-1]:
                         line.stations.append(station_station_click[1])
 
                         #update line
@@ -237,7 +270,18 @@ def station_station_click_update():
                         #reset tracker
                         station_station_click = []
                         return None
+                    
+                    elif station_station_click[1] == line.stations[-1]:
+                        line.stations.append(station_station_click[0])
 
+                        #update line
+                        line.update_point()
+                        line.update_structure()
+
+                        #reset tracker
+                        station_station_click = []
+                        return None
+                
                     elif station_station_click[0] == line.stations[0]:
                         line.stations.insert(0, station_station_click[1])
                         # update train position when add station at the beginning
@@ -259,83 +303,56 @@ def station_station_click_update():
                         #reset tracker
                         station_station_click = []
                         return None
-            for line in line_group.line_list:
-                """  in line station connect
-                if station_station_click[0] in line.stations and station_station_click[1] in line.stations:
-                    line.update_point()
-                    line.update_structure()
-                    station_station_click = []
-                    return None
-                """
-                if station_station_click[0] == line.stations[-1]:
-                    line.stations.append(station_station_click[1])
                     
-                    #update line
-                    line.update_point()
-                    line.update_structure()
-                    
-                    #reset tracker
-                    station_station_click = []
-                    return None
+                    elif station_station_click[1] == line.stations[0]:
+                        line.stations.insert(0, station_station_click[0])
+                        # update train position when add station at the beginning
+                        if get_point(station_station_click[0].location, station_station_click[1].location) == None:
+                            for train in train_group.train_list:
+                                if train.line == line:
+                                    train.current += 1
+                                    train.current_point += 1
+                        else:
+                            for train in train_group.train_list:
+                                if train.line == line:
+                                    train.current += 1
+                                    train.current_point += 2
+
+                        # update line
+                        line.update_point()
+                        line.update_structure()
+
+                        #reset tracker
+                        station_station_click = []
+                        return None
                 
-                elif station_station_click[0] == line.stations[0]:
-                    line.stations.insert(0, station_station_click[1])
-                    # update train position when add station at the beginning
-                    if get_point(station_station_click[0].location, station_station_click[1].location) == None:
-                        for train in train_group.train_list:
-                            if train.line == line:
-                                train.current += 1
-                                train.current_point += 1
-                    else:
-                        for train in train_group.train_list:
-                            if train.line == line:
-                                train.current += 1
-                                train.current_point += 2
-                    
+                elif (station_station_click[0] in line.stations) or (station_station_click[1] in line.stations):
                     # update line
                     line.update_point()
                     line.update_structure()
-                    
+
                     #reset tracker
                     station_station_click = []
                     return None
+
+        
         
         # if the stations are not at the end of the line, make a new line
-        if not stop:
-            if len(line_group.line_list) < 6:
-                new_line = Line()
-                line_group.line_list.append(new_line)
-                new_line.stations.append(station_station_click[0])
-                new_line.stations.append(station_station_click[1])
-                new_line.update_point()
-                new_line.update_structure()
-                new_line.add_train()
-                
-                # change highlighted line
-                line_number = len(line_group.line_list)
-                line_selection = COLORS[line_number - 1]
-                
-                # reset tracker
-                station_station_click = []
-        
-        
-    
-"""
-def line_click_update():
-    global line_click
-    if len(line_click) == 3:
-        segment = line_click.pop(0)
-        line = line_click.pop(0)
-        station = line_click.pop(0)
-        index = line.stations.index(station)
-        if station in line.stations:
-            line.stations.remove(station)
-            for train in train_group.train_list:
-                if train.line == line:
-                    if train.current > index + 1
-        else:
-            line.stations.insert(index + 1, station)
-"""
+        if len(line_group.line_list) < 6:
+            new_line = Line(line_selection)
+            line_group.line_list.append(new_line)
+            new_line.stations.append(station_station_click[0])
+            new_line.stations.append(station_station_click[1])
+            new_line.update_point()
+            new_line.update_structure()
+            new_line.add_train()
+
+            # reset tracker
+            station_station_click = []
+
+        #reset tracker
+        station_station_click = []
+        return None
     
 def line_click_update():
     global line_click
@@ -644,10 +661,11 @@ class Lines:
         self.line_list = []        
         
 class Line:
-    def __init__(self):
+    def __init__(self, color):
         self.stations = []
         self.point_list = []
         self.structure = []
+        self.color = color
     
     def add(self, station):
         self.stations.append(station)
@@ -678,10 +696,10 @@ class Line:
             i += 1
         
         
-    def draw(self, canvas, color):
+    def draw(self, canvas):
         i = 1
         while i < len(self.point_list):
-            draw_line(self.point_list[i-1], self.point_list[i], canvas, color)
+            draw_line(self.point_list[i-1], self.point_list[i], canvas, self.color)
             i += 1
             
     def add_train(self):
@@ -706,10 +724,10 @@ def draw_handler(canvas):
                     color_highlight = color
                     highlight = True
                 else:
-                    line.draw(canvas, color)
+                    line.draw(canvas)
                 i += 1
             if highlight:
-                line_highlight.draw(canvas, color_highlight)
+                line_highlight.draw(canvas)
             i = 0
 
         train_group.update()
@@ -719,6 +737,7 @@ def draw_handler(canvas):
         station_group.update()
         station_station_click_update()
         line_click_update()
+        draw_selected_station(canvas)
         
         # draw UI elements
         # screen message
