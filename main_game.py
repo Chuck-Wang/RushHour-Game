@@ -161,6 +161,32 @@ def draw_selected_station(canvas):
         if station.type == "Triangle":
             point_list = [[station.location[0], station.location[1] - 7], [station.location[0] - 8.66, station.location[1] + 9], [station.location[0] + 8.66, station.location[1] + 9]]
             canvas.draw_polygon(point_list, 1, 'Black', line_selection)
+
+def draw_line_ui(canvas):
+    if line_selection == "Red":
+        point = (720,410)
+        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
+        canvas.draw_polygon(draw_position, 4, "black")
+    
+    elif line_selection == "Blue":
+        point = (720, 430)
+        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
+        canvas.draw_polygon(draw_position, 4, "black")
+    
+    elif line_selection == "Green":
+        point = (720, 450)
+        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
+        canvas.draw_polygon(draw_position, 4, "black")
+    
+    elif line_selection == "Yellow":
+        point = (720, 470)
+        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
+        canvas.draw_polygon(draw_position, 4, "black")
+    
+    elif line_selection == "Orange":
+        point = (720, 490)
+        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
+        canvas.draw_polygon(draw_position, 4, "black")
         
             
 def get_point(location1, location2):
@@ -734,10 +760,11 @@ def draw_handler(canvas):
         if not len(train_group.train_list) == 0:
             train_group.draw(canvas)  
         station_group.draw(canvas)
+        
+        # call frame updates
         station_group.update()
         station_station_click_update()
-        line_click_update()
-        draw_selected_station(canvas)
+        line_click_update()        
         
         # draw UI elements
         # screen message
@@ -754,31 +781,19 @@ def draw_handler(canvas):
         # tutorial message
         canvas.draw_text(tutorial_message, (50, 400), 24, 'Black')
         
-        #line selection
-        """
-        if color == "Red":
-        color_str = "rgba(255, 0, 0, 0.5)"
-    
-    if color == "Blue":
-        color_str = "rgba(0, 0, 255, 0.5)"
-    
-    if color == "Green":
-        color_str = "rgba(0, 255, 0, 0.5)"
-    
-    if color == "Yellow":
-        color_str = "rgba(255, 255, 0, 0.5)"
-    
-    if color == "Orange":
-        color_str = "rgba(255, 165, 0, 0.5)"
-    
-        canvas.draw_line(location1, location2, 10, color_str)
-        """
+        # station selection UI
+        draw_selected_station(canvas)
         
-        canvas.draw_line((720, 410), (780, 410), 18, "Red")
-        canvas.draw_line((720, 430), (780, 430), 18, "Blue")
-        canvas.draw_line((720, 450), (780, 450), 18, "Green")
-        canvas.draw_line((720, 470), (780, 470), 18, "Yellow")
-        canvas.draw_line((720, 490), (780, 490), 18, "Orange")
+        #line selection
+        
+        canvas.draw_line((720, 410), (780, 410), 14, "Red")
+        canvas.draw_line((720, 430), (780, 430), 14, "Blue")
+        canvas.draw_line((720, 450), (780, 450), 14, "Green")
+        canvas.draw_line((720, 470), (780, 470), 14, "Yellow")
+        canvas.draw_line((720, 490), (780, 490), 14, "Orange")
+        
+        # highlight selected UI
+        draw_line_ui(canvas)
         
         
     if screen == "Menu":
