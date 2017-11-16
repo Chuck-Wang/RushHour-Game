@@ -70,6 +70,10 @@ station_spawn_interval = 60
 spawn_interval = 240
 crowded_limit = 600
 
+easy_high_score = 2
+medium_high_score = 300
+hard_high_score = 400
+
 #--------------------Helper Functions
 
 def draw_station(canvas, type, location, crowded_time):
@@ -660,6 +664,7 @@ class Station:
         self.passengers.append(new_passenger)
         
     def update(self):
+        global easy_high_score, medium_high_score, hard_high_score
         # creat new passenger every spawn interval
         if self.timer >= spawn_interval:
             if start:
@@ -672,6 +677,15 @@ class Station:
         # station overload timer
         if len(self.passengers) >= 6:
             if self.crowded_time > crowded_limit:
+                if spawn_interval == 600:
+                    if easy_high_score < score:
+                        easy_high_score = score
+                elif spawn_interval == 420:
+                    if medium_high_score < score:
+                        medium_high_score = score
+                elif spawn_interval == 300:
+                    if hard_high_score < score:
+                        hard_high_score = score
                 game_over()
             else:
                 self.crowded_time += 1
@@ -805,10 +819,46 @@ def draw_handler(canvas):
         canvas.draw_text("Medium", (250, 460), 48, 'Black')
         canvas.draw_text("Hard", (550, 460), 48, 'Black')
         
+        canvas.draw_text("High Score", (650, 50), 24, "Black", "sans-serif")
+        
     if screen == "Gameover":
-        canvas.draw_text("Game Over", (350, 100), 48, 'Black')
-        canvas.draw_text("Score: " + str(score), (350, 300), 48, 'Black')
-        canvas.draw_text("Click anywhere to go back to home screen.", (200, 500), 24, 'Black')
+        if score < 10:
+            level = "Rookie"
+        elif score < 50:
+            level = "Novice"
+        elif score < 100:
+            level = "Experienced"
+        elif score < 300:
+            level = "Expert"
+        else:
+            level = "Master"
+            
+        canvas.draw_text("Game Over", (150, 100), 48, 'Black',"sans-serif")
+        canvas.draw_text("Your system is overcrowded...", (150, 150), 24, 'Black', "sans-serif")
+        canvas.draw_text("You transported " + str(score) + " passenger.", (150, 300), 36, 'Black', "sans-serif")
+        canvas.draw_text("You are ranked ", (150, 350), 36, 'Black', "sans-serif")
+        canvas.draw_text(str(level), (410, 350), 36, 'Blue', "sans-serif")
+        canvas.draw_text("Click anywhere to go back to home screen.", (200, 450), 24, 'Black')
+        
+    if screen == "High_Score":
+        canvas.draw_text("High Score", (150, 100), 48, 'Black',"sans-serif")
+        canvas.draw_text("Click anywhere to go back to home screen.", (200, 450), 24, 'Black')
+        canvas.draw_line((150,110), (800,110), 5, "red")
+        canvas.draw_line((150,110), (125,85), 5, "red")
+        canvas.draw_polygon(((105,65),(125,65),(125,85),(105,85)), 5, "black", "white")
+        canvas.draw_text("Easy: " + str(easy_high_score), (150, 200), 36, 'Black',"sans-serif")
+        canvas.draw_line((150,210), (800,210), 5, "rgb(66, 134, 244)")
+        canvas.draw_line((150,210), (125,185), 5, "rgb(66, 134, 244)")
+        canvas.draw_circle((125,185), 10, 5, "black", "white")
+        canvas.draw_text("Medium: " + str(medium_high_score), (150, 250), 36, 'Black',"sans-serif")
+        canvas.draw_line((150,260), (800,260), 5, "rgb(66, 134, 244)")
+        canvas.draw_line((150,260), (125,235), 5, "rgb(66, 134, 244)")
+        canvas.draw_circle((125,235), 10, 5, "black", "white")
+        canvas.draw_text("Hard: " + str(hard_high_score), (150, 300), 36, 'Black',"sans-serif")
+        canvas.draw_line((150,310), (800,310), 5, "rgb(66, 134, 244)")
+        canvas.draw_line((150,310), (125,285), 5, "rgb(66, 134, 244)")
+        canvas.draw_circle((125,285), 10, 5, "black", "white")
+    
     
 def timer_handler():
     # if in tutorial, run the tutotial handler
@@ -873,7 +923,7 @@ def mouse_handler(position):
                 if distance < 5:
                     line_click.append(line)
                         
-    if screen == "Menu":
+    elif screen == "Menu":
         if position[0] > 250 and position[0] < 450 and position[1] < 370 and position[1] > 320:
             # click on Tutorial Button
             reset("Tutorial")
@@ -889,8 +939,15 @@ def mouse_handler(position):
         if position[0] > 550 and position[0] < 750 and position[1] < 460 and position[1] > 410:
             # click on Hard Button
             reset("Hard")
+        
+        if position[0] > 650 and position[0] < 750 and position[1] < 50 and position[1] > 20:
+            # click on High Score
+            screen = "High_Score"    
             
-    if screen == "Gameover":
+    elif screen == "Gameover":
+        screen = "Menu"
+        
+    elif screen == "High_Score":
         screen = "Menu"
         
             
@@ -921,7 +978,7 @@ def reset(mode):
         my_station1 = Station([430,50], "Circle")
         my_station2 = Station([350,230], "Square")
         my_station3 = Station([150,200], "Triangle")
-        my_station4 = Station([550,300], "Triangle")
+        my_station4 = Station([580,300], "Triangle")
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
         my_station7 = Station([430,380], "Circle")
@@ -964,7 +1021,7 @@ def reset(mode):
         my_station1 = Station([430,50], "Circle")
         my_station2 = Station([350,230], "Square")
         my_station3 = Station([150,200], "Triangle")
-        my_station4 = Station([550,300], "Triangle")
+        my_station4 = Station([580,300], "Triangle")
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
         my_station7 = Station([430,380], "Circle")
@@ -1007,7 +1064,7 @@ def reset(mode):
         my_station1 = Station([430,50], "Circle")
         my_station2 = Station([350,230], "Square")
         my_station3 = Station([150,200], "Triangle")
-        my_station4 = Station([550,300], "Triangle")
+        my_station4 = Station([580,300], "Triangle")
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
         my_station7 = Station([430,380], "Circle")
@@ -1050,7 +1107,7 @@ def reset(mode):
         my_station1 = Station([430,50], "Circle")
         my_station2 = Station([350,230], "Square")
         my_station3 = Station([150,200], "Triangle")
-        my_station4 = Station([550,300], "Triangle")
+        my_station4 = Station([580,300], "Triangle")
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
         my_station7 = Station([430,380], "Circle")
