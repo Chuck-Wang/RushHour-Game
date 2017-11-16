@@ -275,6 +275,7 @@ def station_station_click_update():
         # add station on selected line
         for line in line_group.line_list:
             if line.color == line_selection:
+                stop = True
                 if station_station_click[0] == line.stations[-1] or station_station_click[1] == line.stations[-1] or station_station_click[0] == line.stations[0] or station_station_click[1] == line.stations[0]:
                     if station_station_click[0] == line.stations[-1] and (station_station_click[1] in line.stations):
                         #reset tracker
@@ -365,16 +366,17 @@ def station_station_click_update():
         
         # if the stations are not at the end of the line, make a new line
         if len(line_group.line_list) < 6:
-            new_line = Line(line_selection)
-            line_group.line_list.append(new_line)
-            new_line.stations.append(station_station_click[0])
-            new_line.stations.append(station_station_click[1])
-            new_line.update_point()
-            new_line.update_structure()
-            new_line.add_train()
+            if not stop:
+                new_line = Line(line_selection)
+                line_group.line_list.append(new_line)
+                new_line.stations.append(station_station_click[0])
+                new_line.stations.append(station_station_click[1])
+                new_line.update_point()
+                new_line.update_structure()
+                new_line.add_train()
 
-            # reset tracker
-            station_station_click = []
+                # reset tracker
+                station_station_click = []
 
         #reset tracker
         station_station_click = []
@@ -467,7 +469,7 @@ def game_over():
     global game_over_message, start, screen
     game_over_message = "Game Over"
     start = False
-    screen = "Menu"
+    screen = "Gameover"
         
 #--------------------------Classes
 class Passengers:
@@ -802,6 +804,11 @@ def draw_handler(canvas):
         canvas.draw_text("Easy", (550, 370), 48, 'Black')
         canvas.draw_text("Medium", (250, 460), 48, 'Black')
         canvas.draw_text("Hard", (550, 460), 48, 'Black')
+        
+    if screen == "Gameover":
+        canvas.draw_text("Game Over", (350, 100), 48, 'Black')
+        canvas.draw_text("Score: " + str(score), (350, 300), 48, 'Black')
+        canvas.draw_text("Click anywhere to go back to home screen.", (200, 500), 24, 'Black')
     
 def timer_handler():
     # if in tutorial, run the tutotial handler
@@ -826,7 +833,7 @@ def key_handler(key):
         pass
         
 def mouse_handler(position):
-    global double_speed, line_selection
+    global double_speed, line_selection, screen
     if screen == "Game":
         # Line draw selection
         if position[0] > 720 and position[0] < 780:
@@ -883,6 +890,8 @@ def mouse_handler(position):
             # click on Hard Button
             reset("Hard")
             
+    if screen == "Gameover":
+        screen = "Menu"
         
             
 def start_game():
@@ -1078,8 +1087,6 @@ frame = simplegui.create_frame('Game', 800, 500)
 frame.set_canvas_background('rgb(247,233,206)')
 frame.set_draw_handler(draw_handler)
 frame.set_mouseclick_handler(mouse_handler)
-start_button = frame.add_button('Rush Hour!', start_game)
-reset_button = frame.add_button('New Game', reset)
 
 timer = simplegui.create_timer(1000, timer_handler)
 
