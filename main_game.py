@@ -21,27 +21,6 @@
 # transparent line: roll back point : version 33
 
 
-#Phase one: basic framework
-#			  in this phase, I will build a metro system with
-#             three stations that works on themselves
-#Phase 1 ends at Version 15 of user43_YOieCoiga0
-
-#Phase two: visual effects
-#			in this phase, I will make the link look like metro map
-#    		and all the trains turn at each station
-#Phase 2 ends at Version 0 of user43_rZkLD0LkLW
-
-#Phase three: mouse click system
-#			in this phase, I will build a line creation system and a tracking system 
-#			that allows me to modify line with mouth drag
-#Phase 3 ends ar Version 20 of user43_rZkLD0LkLW
-
-#Phase four: menu, level and tutorial
-#			in this phase, I will build three level with different difficulty
-#			a user interface, and a tutorial
-#Phase 4 ends ar Version 35 of user43_rZkLD0LkLW
-
-
 import simplegui
 import random
 import math
@@ -54,6 +33,8 @@ SPEED = 2
 score = 0
 game_over_message = ""
 tutorial_message = ""
+hint_message = ""
+
 station_station_click = []
 line_click = []
 station_spawn_list = []
@@ -472,7 +453,19 @@ def tutorial_update():
                 tutorial_step = 0
                 start = True
             
-
+def hint():
+    global hint_timer, hint_message
+    hint_timer += 1
+    if hint_timer < 11:
+        if spawn_interval == 600:
+            hint_message = "Hint: Try to mix up station types"
+        elif spawn_interval == 420:
+            hint_message = 'Hint: Some type of station are more "rare"'
+        elif spawn_interval == 300:
+            hint_message = "Hint: You can only delete the entire line, plan ahead"
+    else:
+        hint_message = ""
+            
 def station_spawner():
     global station_spawn_timer
     if station_spawn_timer >= station_spawn_interval:
@@ -712,7 +705,6 @@ class Station:
                 if double_speed:
                     self.crowded_time -=1
             
-
 class Lines:
     def __init__(self):
         self.line_list = []        
@@ -803,6 +795,7 @@ def draw_handler(canvas):
         canvas.draw_text(game_over_message, (50, 250), 24, 'Black')
         lines_left = 5 - len(line_group.line_list)
         canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
+        canvas.draw_text(hint_message, (150, 480), 24, 'Black')
         
         # speed buttons
         canvas.draw_polygon([[740, 40], [740, 60], [756, 50]], 1, 'Black', 'Black')
@@ -876,8 +869,7 @@ def draw_handler(canvas):
         canvas.draw_line((150,310), (800,310), 5, "rgb(66, 134, 244)")
         canvas.draw_line((150,310), (125,285), 5, "rgb(66, 134, 244)")
         canvas.draw_circle((125,285), 10, 5, "black", "white")
-    
-    
+        
 def timer_handler():
     # if in tutorial, run the tutotial handler
     if tutorial:
@@ -886,8 +878,8 @@ def timer_handler():
     # if the game start, run the station spawner
     if start:
         station_spawner()
-        
-    
+        hint()
+            
 def key_handler(key):
     if screen == "Game":
         if key == simplegui.KEY_MAP['1']:
@@ -971,14 +963,13 @@ def mouse_handler(position):
         
     elif screen == "High_Score":
         screen = "Menu"
-        
-            
+                   
 def start_game():
     global start
     start = True
     
 def reset(mode):
-    global score, game_over_message, tutorial_message, station_station_click, start, screen, tutorial
+    global score, game_over_message, tutorial_message, hint_message, hint_timer, station_station_click, start, screen, tutorial
     global station_group, line_group, train_group
     global station_spawn_interval, spawn_interval, crowded_limit
     
@@ -987,6 +978,8 @@ def reset(mode):
         score = 0
         game_over_message = ""
         tutorial_message = ""
+        hint_message = ""
+        hint_timer = 0
         station_station_click = []
         line_click = []
         station_spawn_list = []
@@ -1039,6 +1032,8 @@ def reset(mode):
         score = 0
         game_over_message = ""
         tutorial_message = ""
+        hint_message = ""
+        hint_timer = 0
         station_station_click = []
         line_click = []
         station_spawn_list = []
@@ -1091,6 +1086,8 @@ def reset(mode):
         score = 0
         game_over_message = ""
         tutorial_message = ""
+        hint_message = ""
+        hint_timer = 0
         station_station_click = []
         line_click = []
         station_spawn_list = []
@@ -1143,6 +1140,8 @@ def reset(mode):
         score = 0
         game_over_message = ""
         tutorial_message = ""
+        hint_message = ""
+        hint_timer = 0
         station_station_click = []
         line_click = []
         station_spawn_list = []
