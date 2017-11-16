@@ -431,23 +431,38 @@ def tutorial_update():
                 tutorial_step = 5
 
         if tutorial_step == 5:
-            tutorial_message = "The new station is crowded! create a new line to get passengers moving!"
+            tutorial_message = "We have a new station! selct a new color to create a new line!"
             if temporary_timer == 0:
                 new_station = Station([130,50], "Circle")
-                new_station.crowded_time = 50
-                new_station.new_passenger()
-                new_station.new_passenger()
-                new_station.new_passenger()
-                new_station.new_passenger()
-                new_station.new_passenger()
-                new_station.new_passenger()
                 station_group.add(new_station)
+            if not line_selection == "Red":
+                tutorial_step = 6
+                
+        if tutorial_step == 6:
+            tutorial_message = "Now you can create a new line in your color!"
+            if len(line_group.line_list) == 2:
+                tutorial_step = 7
+            
+        if tutorial_step == 7:    
+            tutorial_message = "When your station have lots of passengers, it will get crowded"
+            if temporary_timer == 0:
+                station_group.station_list[3].crowded_time = 50
+                station_group.station_list[3].new_passenger()
+                station_group.station_list[3].new_passenger()
+                station_group.station_list[3].new_passenger()
+                station_group.station_list[3].new_passenger()
+                station_group.station_list[3].new_passenger()
+                station_group.station_list[3].new_passenger()
             temporary_timer += 1
             if station_group.station_list[3].crowded_time == 0:
                 temporary_timer = 0
-                tutorial_step = 6
+                tutorial_step = 8
+                
+        if tutorial_step == 8:
+            tutorial_message = "You can delete any line by double-clicking it anytime"
+            tutorial_step = 9
 
-        if tutorial_step == 6:
+        elif tutorial_step == 9:
             tutorial_message = "Now you've learn the basics, go and start building!"
             temporary_timer += 1
             if temporary_timer == 10:
@@ -795,10 +810,13 @@ def draw_handler(canvas):
         canvas.draw_polygon([[750, 70], [750, 90], [766, 80]], 1, 'Black', 'Black')
         
         # tutorial message
-        canvas.draw_text(tutorial_message, (50, 400), 24, 'Black')
+        canvas.draw_text(tutorial_message, (50, 350), 24, 'Black', "sans-serif")
         
         # station selection UI
         draw_selected_station(canvas)
+        
+        # home button
+        canvas.draw_image(home, (256, 256), (512, 512), (30, 30), (40, 40))
         
         #line selection
         
@@ -898,6 +916,10 @@ def mouse_handler(position):
             if position[1] > 480 and position[1] < 500:
                 line_selection = "Orange"
         
+        # Home Button
+        if position[0] < 50 and position[0] > 10 and position[1] > 10 and position[1] < 50:
+            screen = "Menu"
+        
         # Game speed control
         if position[0] < 770 and position[0] > 730 and position[1] > 40 and position[1] < 60:
             double_speed = False
@@ -964,10 +986,19 @@ def reset(mode):
         # Reset all globals
         score = 0
         game_over_message = ""
+        tutorial_message = ""
         station_station_click = []
+        line_click = []
+        station_spawn_list = []
+        station_spawn_timer = 0
+        temporary_timer = 0
+        tutorial_step = 0
+        double_speed = False
+        line_selection = "Red"
         start = False
         tutorial = True
         screen = "Game"
+        
         station_spawn_interval = 30
         spawn_interval = 600
         crowded_limit = 1200
@@ -1007,7 +1038,16 @@ def reset(mode):
         # Reset all globals
         score = 0
         game_over_message = ""
+        tutorial_message = ""
         station_station_click = []
+        line_click = []
+        station_spawn_list = []
+        station_spawn_timer = 0
+        temporary_timer = 0
+        tutorial_step = 0
+        double_speed = False
+        line_selection = "Red"
+        
         start = True
         tutorial = False
         screen = "Game"
@@ -1050,7 +1090,16 @@ def reset(mode):
         # Reset all globals
         score = 0
         game_over_message = ""
+        tutorial_message = ""
         station_station_click = []
+        line_click = []
+        station_spawn_list = []
+        station_spawn_timer = 0
+        temporary_timer = 0
+        tutorial_step = 0
+        double_speed = False
+        line_selection = "Red"
+        
         start = True
         tutorial = False
         screen = "Game"
@@ -1093,7 +1142,16 @@ def reset(mode):
         # Reset all globals
         score = 0
         game_over_message = ""
+        tutorial_message = ""
         station_station_click = []
+        line_click = []
+        station_spawn_list = []
+        station_spawn_timer = 0
+        temporary_timer = 0
+        tutorial_step = 0
+        double_speed = False
+        line_selection = "Red"
+        
         start = True
         tutorial = False
         screen = "Game"
@@ -1139,6 +1197,8 @@ train_group = Trains()
 #----------------------Create a frame
 black_train_pic = simplegui.load_image("https://dl.dropbox.com/s/3jss4r73a5q0wiq/black_train.jpg?dl=0")
 menu = simplegui.load_image("https://dl.dropbox.com/s/7f2ewottnbte37q/menu.jpg?dl=0")
+arrow = simplegui.load_image("https://dl.dropbox.com/s/4v8xv4ng86nidjb/arrow.png?dl=0")
+home = simplegui.load_image("https://dl.dropbox.com/s/udbvanyfwuviw7f/home-icon-png-home-house-icon-24.png?dl=0")
 
 frame = simplegui.create_frame('Game', 800, 500)
 frame.set_canvas_background('rgb(247,233,206)')
