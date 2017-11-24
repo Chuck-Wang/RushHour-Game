@@ -148,31 +148,39 @@ def draw_selected_station(canvas):
             canvas.draw_polygon(point_list, 1, 'Black', line_selection)
 
 def draw_line_ui(canvas):
-    if line_selection == "Red":
-        point = (720,410)
-        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
-        canvas.draw_polygon(draw_position, 4, "black")
-    
-    elif line_selection == "Blue":
-        point = (720, 430)
-        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
-        canvas.draw_polygon(draw_position, 4, "black")
-    
-    elif line_selection == "Green":
-        point = (720, 450)
-        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
-        canvas.draw_polygon(draw_position, 4, "black")
-    
-    elif line_selection == "Yellow":
-        point = (720, 470)
-        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
-        canvas.draw_polygon(draw_position, 4, "black")
-    
-    elif line_selection == "Orange":
-        point = (720, 490)
-        draw_position = [(point[0], point[1] - 9),(point[0] + 60, point[1] - 9),(point[0] + 60, point[1] + 9),(point[0], point[1] + 9)]
-        canvas.draw_polygon(draw_position, 4, "black")
+    color = []
+    for line in line_group.line_list:
+        color.append(line.color)
         
+    if line_selection == "Red":
+        if "Red" in color:
+            canvas.draw_circle((780, 360), 7, 3, "Black")
+        else:
+            canvas.draw_circle((780, 360), 12, 3, "Black")
+            
+    elif line_selection == "Blue":
+        if "Blue" in color:
+            canvas.draw_circle((780, 390), 7, 3, "Black")
+        else:
+            canvas.draw_circle((780, 390), 12, 3, "Black")
+            
+    elif line_selection == "Green":
+        if "Green" in color:
+            canvas.draw_circle((780, 420), 7, 3, "Black")
+        else:
+            canvas.draw_circle((780, 420), 12, 3, "Black")
+            
+    elif line_selection == "Yellow":
+        if "Yellow" in color:
+            canvas.draw_circle((780, 450), 7, 3, "Black")
+        else:
+            canvas.draw_circle((780, 450), 12, 3, "Black")
+            
+    elif line_selection == "Orange":
+        if "Orange" in color:
+            canvas.draw_circle((780, 480), 7, 3, "Black")
+        else:
+            canvas.draw_circle((780, 480), 12, 3, "Black")
             
 def get_point(location1, location2):
     # get the turning point for the rail between two given station position
@@ -815,7 +823,7 @@ def draw_handler(canvas):
         canvas.draw_text("Score: " + str(score), (700, 20), 24, 'Black')
         canvas.draw_text(game_over_message, (50, 250), 24, 'Black')
         lines_left = 5 - len(line_group.line_list)
-        canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
+        #canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
         canvas.draw_text(hint_message, (150, 480), 24, 'Black')
         
         # speed buttons
@@ -836,12 +844,34 @@ def draw_handler(canvas):
         canvas.draw_image(home, (256, 256), (512, 512), (30, 30), (40, 40))
         
         #line selection
-        
-        canvas.draw_line((720, 410), (780, 410), 14, "Red")
-        canvas.draw_line((720, 430), (780, 430), 14, "Blue")
-        canvas.draw_line((720, 450), (780, 450), 14, "Green")
-        canvas.draw_line((720, 470), (780, 470), 14, "Yellow")
-        canvas.draw_line((720, 490), (780, 490), 14, "Orange")
+        color = []
+        for line in line_group.line_list:
+            color.append(line.color)
+            
+        if "Red" in color:
+            canvas.draw_circle((780, 360), 5, 6, "Red", "Red")
+        else:
+            canvas.draw_circle((780, 360), 10, 6, "Red", "Red")
+            
+        if "Blue" in color:
+            canvas.draw_circle((780, 390), 5, 6, "Blue", "Blue")
+        else:
+            canvas.draw_circle((780, 390), 10, 6, "Blue", "Blue")
+            
+        if "Green" in color:
+            canvas.draw_circle((780, 420), 5, 6, "Green", "Green")
+        else:
+            canvas.draw_circle((780, 420), 10, 6, "Green", "Green")
+            
+        if "Yellow" in color:
+            canvas.draw_circle((780, 450), 5, 6, "Yellow", "Yellow")
+        else:
+            canvas.draw_circle((780, 450), 10, 6, "Yellow", "Yellow")
+            
+        if "Orange" in color:
+            canvas.draw_circle((780, 480), 5, 6, "Orange", "Orange")
+        else:
+            canvas.draw_circle((780, 480), 10, 6, "Orange", "Orange")
         
         # highlight selected UI
         draw_line_ui(canvas)
@@ -939,16 +969,16 @@ def mouse_handler(position):
     global double_speed, line_selection, screen
     if screen == "Game":
         # Line draw selection
-        if position[0] > 720 and position[0] < 780:
-            if position[1] > 400 and position[1] < 420:
+        if position[0] > 765 and position[0] < 795:
+            if position[1] > 345 and position[1] < 375:
                 line_selection = "Red"
-            if position[1] > 420 and position[1] < 440:
+            if position[1] > 375 and position[1] < 405:
                 line_selection = "Blue"
-            if position[1] > 440 and position[1] < 460:
+            if position[1] > 405 and position[1] < 435:
                 line_selection = "Green"
-            if position[1] > 460 and position[1] < 480:
+            if position[1] > 435 and position[1] < 465:
                 line_selection = "Yellow"
-            if position[1] > 480 and position[1] < 500:
+            if position[1] > 465 and position[1] < 595:
                 line_selection = "Orange"
         
         # Home Button
