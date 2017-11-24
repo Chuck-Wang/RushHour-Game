@@ -820,18 +820,19 @@ def draw_handler(canvas):
         
         # draw UI elements
         # screen message
-        canvas.draw_text("Score: " + str(score), (700, 20), 24, 'Black')
-        canvas.draw_text(game_over_message, (50, 250), 24, 'Black')
+        canvas.draw_text(str(score), (730, 40), 24, 'Black', "sans-serif")
+        canvas.draw_image(passenger, (100, 100), (200, 200), (720, 30), (30, 30))
+        canvas.draw_text(game_over_message, (50, 250), 24, 'Black', "sans-serif")
         lines_left = 5 - len(line_group.line_list)
         #canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
-        canvas.draw_text(hint_message, (150, 480), 24, 'Black')
+        canvas.draw_text(hint_message, (150, 480), 24, 'Black', "sans-serif")
         
         # speed buttons
         if double_speed:
-            canvas.draw_polygon([[730, 40], [730, 60], [746, 50]], 1, 'Black', 'Black')
-            canvas.draw_polygon([[750, 40], [750, 60], [766, 50]], 1, 'Black', 'Black')
+            canvas.draw_polygon([[710, 60], [710, 80], [726, 70]], 1, 'Black', 'Black')
+            canvas.draw_polygon([[730, 60], [730, 80], [746, 70]], 1, 'Black', 'Black')
         else:    
-            canvas.draw_polygon([[740, 40], [740, 60], [756, 50]], 1, 'Black', 'Black')
+            canvas.draw_polygon([[720, 60], [720, 80], [736, 70]], 1, 'Black', 'Black')
         
         
         # tutorial message
@@ -986,7 +987,7 @@ def mouse_handler(position):
             screen = "Menu"
         
         # Game speed control
-        if position[0] < 770 and position[0] > 730 and position[1] > 40 and position[1] < 60:
+        if position[0] < 750 and position[0] > 710 and position[1] > 60 and position[1] < 80:
             if double_speed:
                 double_speed = False
             else:
@@ -1307,6 +1308,7 @@ black_train_pic = simplegui.load_image("https://dl.dropbox.com/s/3jss4r73a5q0wiq
 menu = simplegui.load_image("https://dl.dropbox.com/s/7f2ewottnbte37q/menu.jpg?dl=0")
 arrow = simplegui.load_image("https://dl.dropbox.com/s/4v8xv4ng86nidjb/arrow.png?dl=0")
 home = simplegui.load_image("https://dl.dropbox.com/s/udbvanyfwuviw7f/home-icon-png-home-house-icon-24.png?dl=0")
+passenger = simplegui.load_image("https://dl.dropbox.com/s/1c4c6vl07sh0ab1/44909-200.png?dl=0")
 
 frame = simplegui.create_frame('Game', 800, 500)
 frame.set_canvas_background('rgb(247,233,206)')
