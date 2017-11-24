@@ -381,6 +381,13 @@ def tutorial_update():
     global start, tutorial, tutorial_step, tutorial_message, temporary_timer
     if screen == "Game":
         if tutorial_step == 0:
+            tutorial_message = "It's Rush Hour, deliver as many passenger as possible."
+            temporary_timer += 1
+            if temporary_timer == 5:
+                temporary_timer = 0
+                tutorial_step = 0.5
+                
+        if tutorial_step == 0.5:
             tutorial_message = "Click on two stations to build a line between them."
             if not len(line_group.line_list) == 0:
                 tutorial_step = 1
@@ -453,6 +460,14 @@ def tutorial_update():
                 tutorial_step = 0
                 start = True
             
+def score_update():
+    if spawn_interval == 600:
+        if score > 200:
+            you_win()
+    elif spawn_interval == 420:
+        if score > 350:
+            you_win()
+            
 def hint():
     global hint_timer, hint_message
     hint_timer += 1
@@ -475,13 +490,18 @@ def station_spawner():
     station_spawn_timer += 1
     if double_speed:
         station_spawn_timer += 1
-
         
 def game_over():
     global game_over_message, start, screen
     game_over_message = "Game Over"
     start = False
     screen = "Gameover"
+    
+def you_win():
+    global game_over_message, start, screen
+    game_over_message = "Good Job!"
+    start = False
+    screen = "You Win"
         
 #--------------------------Classes
 class Passengers:
@@ -787,7 +807,8 @@ def draw_handler(canvas):
         # call frame updates
         station_group.update()
         station_station_click_update()
-        line_click_update()        
+        line_click_update()
+        score_update()
         
         # draw UI elements
         # screen message
@@ -798,9 +819,12 @@ def draw_handler(canvas):
         canvas.draw_text(hint_message, (150, 480), 24, 'Black')
         
         # speed buttons
-        canvas.draw_polygon([[740, 40], [740, 60], [756, 50]], 1, 'Black', 'Black')
-        canvas.draw_polygon([[730, 70], [730, 90], [746, 80]], 1, 'Black', 'Black')
-        canvas.draw_polygon([[750, 70], [750, 90], [766, 80]], 1, 'Black', 'Black')
+        if double_speed:
+            canvas.draw_polygon([[730, 40], [730, 60], [746, 50]], 1, 'Black', 'Black')
+            canvas.draw_polygon([[750, 40], [750, 60], [766, 50]], 1, 'Black', 'Black')
+        else:    
+            canvas.draw_polygon([[740, 40], [740, 60], [756, 50]], 1, 'Black', 'Black')
+        
         
         # tutorial message
         canvas.draw_text(tutorial_message, (50, 350), 24, 'Black', "sans-serif")
@@ -851,6 +875,25 @@ def draw_handler(canvas):
         canvas.draw_text(str(level), (410, 350), 36, 'Blue', "sans-serif")
         canvas.draw_text("Click anywhere to go back to home screen.", (200, 450), 24, 'Black')
         
+    if screen == "You Win":
+        if score < 10:
+            level = "Rookie"
+        elif score < 50:
+            level = "Novice"
+        elif score < 100:
+            level = "Experienced"
+        elif score < 300:
+            level = "Expert"
+        else:
+            level = "Master"
+            
+        canvas.draw_text("Good Job!", (150, 100), 48, 'Black',"sans-serif")
+        canvas.draw_text("All passengers got to their destination!", (150, 150), 24, 'Black', "sans-serif")
+        canvas.draw_text("You transported " + str(score) + " passenger.", (150, 300), 36, 'Black', "sans-serif")
+        canvas.draw_text("You are ranked ", (150, 350), 36, 'Black', "sans-serif")
+        canvas.draw_text(str(level), (410, 350), 36, 'Blue', "sans-serif")
+        canvas.draw_text("Click anywhere to go back to home screen.", (200, 450), 24, 'Black')
+    
     if screen == "High_Score":
         canvas.draw_text("High Score", (150, 100), 48, 'Black',"sans-serif")
         canvas.draw_text("Click anywhere to go back to home screen.", (200, 450), 24, 'Black')
@@ -914,10 +957,15 @@ def mouse_handler(position):
         
         # Game speed control
         if position[0] < 770 and position[0] > 730 and position[1] > 40 and position[1] < 60:
-            double_speed = False
+            if double_speed:
+                double_speed = False
+            else:
+                double_speed = True
         
+        '''
         if position[0] < 770 and position[0] > 730 and position[1] > 70 and position[1] < 90:
             double_speed = True
+        '''
         
         # check if mouse click near a station
         for station in station_group.station_list:
@@ -961,6 +1009,9 @@ def mouse_handler(position):
     elif screen == "Gameover":
         screen = "Menu"
         
+    elif screen == "You Win":
+        screen = "Menu"
+    
     elif screen == "High_Score":
         screen = "Menu"
                    
@@ -969,7 +1020,9 @@ def start_game():
     start = True
     
 def reset(mode):
-    global score, game_over_message, tutorial_message, hint_message, hint_timer, station_station_click, start, screen, tutorial
+    global score, game_over_message, tutorial_message, hint_message, hint_timer, station_station_click
+    global line_click, station_spawn_list, station_spawn_timer, temporary_timer, tutorial_step, double_speed
+    global line_selection, start, screen, tutorial
     global station_group, line_group, train_group
     global station_spawn_interval, spawn_interval, crowded_limit
     
@@ -1008,8 +1061,12 @@ def reset(mode):
         my_station7 = Station([430,380], "Circle")
         my_station8 = Station([240,400], "Square")
         my_station9 = Station([170,300], "Triangle")
-        my_station10 = Station([430,200], "Circle")
+        my_station10 = Station([450,180], "Circle")
         my_station11 = Station([540,400], "Square")
+        my_station12 = Station([170,380], "Circle")
+        my_station13 = Station([240,70], "Circle")
+        my_station14 = Station([560,120], "Triangle")
+        my_station15 = Station([530,70], "Circle")
 
         station_group.add(my_station1)
         station_group.add(my_station2)
@@ -1062,8 +1119,13 @@ def reset(mode):
         my_station7 = Station([430,380], "Circle")
         my_station8 = Station([240,400], "Square")
         my_station9 = Station([170,300], "Triangle")
-        my_station10 = Station([430,200], "Circle")
+        my_station10 = Station([450,180], "Circle")
         my_station11 = Station([540,400], "Square")
+        my_station12 = Station([170,380], "Circle")
+        my_station13 = Station([240,70], "Circle")
+        my_station14 = Station([560,120], "Triangle")
+        my_station15 = Station([530,70], "Circle")
+
 
         station_group.add(my_station1)
         station_group.add(my_station2)
@@ -1077,6 +1139,7 @@ def reset(mode):
         station_spawn_list.append(my_station9)
         station_spawn_list.append(my_station10)
         station_spawn_list.append(my_station11)
+        
 
         line_group = Lines()
         train_group = Trains()
@@ -1114,10 +1177,14 @@ def reset(mode):
         my_station5 = Station([220,100], "Circle")
         my_station6 = Station([550,200], "Triangle")
         my_station7 = Station([430,380], "Circle")
-        my_station8 = Station([240,400], "Square")
+        my_station8 = Station([240,400], "Triangle")
         my_station9 = Station([170,300], "Triangle")
-        my_station10 = Station([430,200], "Circle")
+        my_station10 = Station([450,180], "Circle")
         my_station11 = Station([540,400], "Square")
+        my_station12 = Station([170,380], "Circle")
+        my_station13 = Station([240,70], "Circle")
+        my_station14 = Station([560,120], "Triangle")
+        my_station15 = Station([530,70], "Circle")
 
         station_group.add(my_station1)
         station_group.add(my_station2)
@@ -1131,6 +1198,10 @@ def reset(mode):
         station_spawn_list.append(my_station9)
         station_spawn_list.append(my_station10)
         station_spawn_list.append(my_station11)
+        station_spawn_list.append(my_station12)
+        station_spawn_list.append(my_station13)
+        station_spawn_list.append(my_station14)
+        station_spawn_list.append(my_station15)
 
         line_group = Lines()
         train_group = Trains()
@@ -1170,8 +1241,12 @@ def reset(mode):
         my_station7 = Station([430,380], "Circle")
         my_station8 = Station([240,400], "Square")
         my_station9 = Station([170,300], "Triangle")
-        my_station10 = Station([430,200], "Circle")
+        my_station10 = Station([450,180], "Circle")
         my_station11 = Station([540,400], "Square")
+        my_station12 = Station([170,380], "Circle")
+        my_station13 = Station([240,70], "Circle")
+        my_station14 = Station([560,120], "Triangle")
+        my_station15 = Station([530,70], "Circle")
 
         station_group.add(my_station1)
         station_group.add(my_station2)
@@ -1185,6 +1260,10 @@ def reset(mode):
         
         station_spawn_list.append(my_station10)
         station_spawn_list.append(my_station11)
+        station_spawn_list.append(my_station12)
+        station_spawn_list.append(my_station13)
+        station_spawn_list.append(my_station14)
+        station_spawn_list.append(my_station15)        
 
         line_group = Lines()
         train_group = Trains()
