@@ -13,7 +13,7 @@
 #Click the icons on the lower-right side to change line selection
 #The passenger will get on the train and disappear when they arrive at their destination
 
-# Game Pitch Sheet: https://dl.dropbox.com/s/lzxz96254mmlfu9/Rush%20Hour%20-%20Chuck%20Wang.pdf?dl=0
+# Game Pitch Sheet: https://www.dropbox.com/s/4g4jmbhov3m45vl/Rush%20Hour%20-%20Update.jpg?dl=0
 
 #Developing note
 
