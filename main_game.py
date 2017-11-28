@@ -1057,6 +1057,9 @@ def reset(mode):
     global station_group, line_group, train_group
     global station_spawn_interval, spawn_interval, crowded_limit
     
+    bgm.rewind()
+    bgm.play()
+    
     if mode == "Tutorial":
         # Reset all globals
         score = 0
@@ -1309,6 +1312,7 @@ menu = simplegui.load_image("https://dl.dropbox.com/s/7f2ewottnbte37q/menu.jpg?d
 arrow = simplegui.load_image("https://dl.dropbox.com/s/4v8xv4ng86nidjb/arrow.png?dl=0")
 home = simplegui.load_image("https://dl.dropbox.com/s/udbvanyfwuviw7f/home-icon-png-home-house-icon-24.png?dl=0")
 passenger = simplegui.load_image("https://dl.dropbox.com/s/1c4c6vl07sh0ab1/44909-200.png?dl=0")
+bgm = simplegui.load_sound('https://dl.dropbox.com/s/yu8of4zyy8bdly2/01%20SimCity%20Theme.mp3?dl=0')
 
 frame = simplegui.create_frame('Game', 800, 500)
 frame.set_canvas_background('rgb(247,233,206)')
@@ -1327,3 +1331,4 @@ frame.set_keydown_handler(key_handler)
 
 frame.start()
 timer.start()
+bgm.play()
