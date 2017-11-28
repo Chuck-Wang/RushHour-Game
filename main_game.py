@@ -483,7 +483,7 @@ def hint():
         if spawn_interval == 600:
             hint_message = "Hint: Try to mix up station types"
         elif spawn_interval == 420:
-            hint_message = 'Hint: Some type of station are more "rare"'
+            hint_message = 'Hint: Some type of station is more "rare"'
         elif spawn_interval == 300:
             hint_message = "Hint: You can only delete the entire line, plan ahead"
     else:
@@ -786,8 +786,6 @@ class Line:
         train_group.train_list.append(new_train)
         
 
-        
-
 #------------------Define event handlers
 
 def draw_handler(canvas):
@@ -827,7 +825,11 @@ def draw_handler(canvas):
         canvas.draw_text(game_over_message, (50, 250), 24, 'Black', "sans-serif")
         lines_left = 5 - len(line_group.line_list)
         #canvas.draw_text("Lines left: " + str(lines_left), (20, 480), 24, 'Black')
-        canvas.draw_text(hint_message, (150, 480), 24, 'Black', "sans-serif")
+        
+        # hint UI
+        canvas.draw_text(hint_message, (150, 470), 24, 'Black', "sans-serif")
+        if hint_timer < 11:
+            canvas.draw_image(hint_box, (500, 94), (1000, 188), (420, 460), (650, 80))
         
         # speed buttons
         if double_speed:
@@ -1314,6 +1316,7 @@ menu = simplegui.load_image("https://dl.dropbox.com/s/7f2ewottnbte37q/menu.jpg?d
 arrow = simplegui.load_image("https://dl.dropbox.com/s/4v8xv4ng86nidjb/arrow.png?dl=0")
 home = simplegui.load_image("https://dl.dropbox.com/s/udbvanyfwuviw7f/home-icon-png-home-house-icon-24.png?dl=0")
 passenger = simplegui.load_image("https://dl.dropbox.com/s/1c4c6vl07sh0ab1/44909-200.png?dl=0")
+hint_box = simplegui.load_image("https://dl.dropbox.com/s/89qh3n51jajwyc1/lol.png?dl=0")
 bgm = simplegui.load_sound('https://dl.dropbox.com/s/yu8of4zyy8bdly2/01%20SimCity%20Theme.mp3?dl=0')
 pop_sound = simplegui.load_sound('https://dl.dropbox.com/s/2pkq9kxvyitlw3u/zapsplat_cartoon_pop_small_lid.mp3?dl=0')
 
