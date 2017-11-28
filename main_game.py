@@ -389,7 +389,7 @@ def tutorial_update():
     global start, tutorial, tutorial_step, tutorial_message, temporary_timer
     if screen == "Game":
         if tutorial_step == 0:
-            tutorial_message = "It's Rush Hour, deliver as many passenger as possible."
+            tutorial_message = "It's Rush Hour, deliver as many passengers as possible."
             temporary_timer += 1
             if temporary_timer == 5:
                 temporary_timer = 0
@@ -408,7 +408,7 @@ def tutorial_update():
                 tutorial_step = 2
 
         if tutorial_step == 2:
-            tutorial_message = "Oops you created a 2nd line, double click on the line to delete it."
+            tutorial_message = "Oops, you created a 2nd line, double-click on the line to delete it."
             if len(line_group.line_list) == 1:
                 tutorial_step = 1
 
@@ -422,12 +422,12 @@ def tutorial_update():
                 temporary_timer = 0
 
         if tutorial_step == 4:
-            tutorial_message = "Once the passenger arrive at his station, you will get a point!"
+            tutorial_message = "Once the passenger arrives at his station, you will get a point!"
             if score == 1:
                 tutorial_step = 5
 
         if tutorial_step == 5:
-            tutorial_message = "We have a new station! selct a new color to create a new line!"
+            tutorial_message = "We have a new station! select a new color to create a new line!"
             if temporary_timer == 0:
                 new_station = Station([130,50], "Circle")
                 station_group.add(new_station)
@@ -435,12 +435,12 @@ def tutorial_update():
                 tutorial_step = 6
                 
         if tutorial_step == 6:
-            tutorial_message = "Now you can create a new line in your color!"
+            tutorial_message = "Now you can create a new line of your color!"
             if len(line_group.line_list) == 2:
                 tutorial_step = 7
             
         if tutorial_step == 7:    
-            tutorial_message = "When your station have lots of passengers, it will get crowded"
+            tutorial_message = "When your station has lots of passengers, it will get crowded"
             if temporary_timer == 0:
                 station_group.station_list[3].crowded_time = 50
                 station_group.station_list[3].new_passenger()
@@ -459,7 +459,7 @@ def tutorial_update():
             tutorial_step = 9
 
         elif tutorial_step == 9:
-            tutorial_message = "Now you've learn the basics, go and start building!"
+            tutorial_message = "Now you've learned the basics, go and start building!"
             temporary_timer += 1
             if temporary_timer == 10:
                 tutorial = False
@@ -494,6 +494,8 @@ def station_spawner():
     if station_spawn_timer >= station_spawn_interval:
         if not len(station_spawn_list) == 0:
             station_group.station_list.append(station_spawn_list.pop(0))
+            pop_sound.rewind()
+            pop_sound.play()
             station_spawn_timer = 0
     station_spawn_timer += 1
     if double_speed:
@@ -1313,6 +1315,7 @@ arrow = simplegui.load_image("https://dl.dropbox.com/s/4v8xv4ng86nidjb/arrow.png
 home = simplegui.load_image("https://dl.dropbox.com/s/udbvanyfwuviw7f/home-icon-png-home-house-icon-24.png?dl=0")
 passenger = simplegui.load_image("https://dl.dropbox.com/s/1c4c6vl07sh0ab1/44909-200.png?dl=0")
 bgm = simplegui.load_sound('https://dl.dropbox.com/s/yu8of4zyy8bdly2/01%20SimCity%20Theme.mp3?dl=0')
+pop_sound = simplegui.load_sound('https://dl.dropbox.com/s/2pkq9kxvyitlw3u/zapsplat_cartoon_pop_small_lid.mp3?dl=0')
 
 frame = simplegui.create_frame('Game', 800, 500)
 frame.set_canvas_background('rgb(247,233,206)')
