@@ -506,6 +506,7 @@ def game_over():
     game_over_message = "Game Over"
     start = False
     screen = "Gameover"
+    station_sound.pause()
     
 def you_win():
     global game_over_message, start, screen
@@ -712,6 +713,7 @@ class Station:
             self.timer += 1
             if double_speed:
                 self.timer += 1
+        
         # station overload timer
         if len(self.passengers) >= 6:
             if self.crowded_time > crowded_limit:
@@ -734,6 +736,7 @@ class Station:
                 self.crowded_time -= 1
                 if double_speed:
                     self.crowded_time -=1
+                    
             
 class Lines:
     def __init__(self):
@@ -1063,6 +1066,8 @@ def reset(mode):
     
     bgm.rewind()
     bgm.play()
+    station_sound.rewind()
+    station_sound.play()
     
     if mode == "Tutorial":
         # Reset all globals
@@ -1319,6 +1324,9 @@ passenger = simplegui.load_image("https://dl.dropbox.com/s/1c4c6vl07sh0ab1/44909
 hint_box = simplegui.load_image("https://dl.dropbox.com/s/89qh3n51jajwyc1/lol.png?dl=0")
 bgm = simplegui.load_sound('https://dl.dropbox.com/s/yu8of4zyy8bdly2/01%20SimCity%20Theme.mp3?dl=0')
 pop_sound = simplegui.load_sound('https://dl.dropbox.com/s/2pkq9kxvyitlw3u/zapsplat_cartoon_pop_small_lid.mp3?dl=0')
+station_sound = simplegui.load_sound('https://dl.dropbox.com/s/sjlr2hs7a4bhpuf/Glasgow%20Central%20announcements%20part%205%20%281%29.mp4_20171130_165323.mp3?dl=0')
+station_sound.set_volume(0.2)
+crowd_sound = simplegui.load_sound('https://www.dropbox.com/s/46qq0ajit9g4led/TRAIN%20STATION%20SOUNDS%20effects%2C%20Sound%20of%20railway%20station%2C%20busy%20soundscape%20background%20noise%20effect.mp4_20171130_172601.mp3?dl=0')
 
 frame = simplegui.create_frame('Game', 800, 500)
 frame.set_canvas_background('rgb(247,233,206)')
